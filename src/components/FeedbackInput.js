@@ -112,14 +112,17 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
     setRating(newRating);
     setSliderTouched(true);
 
-    if (!hasUserTyped && comment === prefilled) {
+    if (!hasUserTyped && comment.startsWith(prefilled)) {
       const base = `${placeholderMap[newRating - 1]} because `;
       const full = `${base}... (Press Enter to submit)`;
 
-      setPrefilled(base); // ← store only the "base"
-      setComment(full);   // ← show full placeholder-ish string
       setPrefilled(base);
       setComment(full);
+
+      const textarea = textareaRef.current;
+      if (textarea) {
+        textarea.selectionStart = textarea.selectionEnd = base.length;
+      }
     }
   };
 
@@ -138,7 +141,7 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
         }
       });
     } else if (comment.includes("(Press Enter to submit)")) {
-      const base = comment.replace(/\.\.\.\\n\(Press Enter to submit\)/, "").trimEnd();
+      const base = comment.replace(/\s*\.\.\.\s*\(Press Enter to submit\)/, "").trimEnd();
       setComment(base + " ");
       const textarea = textareaRef.current;
       if (textarea) {
