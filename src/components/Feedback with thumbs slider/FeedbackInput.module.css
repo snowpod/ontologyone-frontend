@@ -1,0 +1,152 @@
+/* Feedback.module.css or similar */
+
+.feedbackContainer1 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 5px 0px 5px;
+  flex-grow: 1;
+}
+
+.feedbackWrapper {
+
+  border-radius: 8px;
+  padding: 20px;
+ }
+
+.feedbackHeader {
+  width: auto;
+  text-align: left;
+  border-radius: 8px;
+  transition: font-weight 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* ensure collapsing works */
+  padding: 10px;
+  display: inline-block;
+}
+
+.feedbackHeader:hover {
+  background-color: #e5e7eb; /* light grey */
+}
+
+.open {
+  background-color: #f0f0f0;
+}
+
+.textarea {
+  width: 100%;
+  padding-left: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  display: block;
+  transition: height 0.2s ease;
+  padding: 10px;
+
+  overflow: hidden;
+  resize: none;
+  scrollbar-width: none;    /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */ 
+}
+
+textarea:focus {
+  outline: none;
+  border-color: 1px solid #ccc;
+} 
+
+.sliderWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center; /* Align thumbs to slider */
+  justify-content: center;
+  margin-top: 5px;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.sliderColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.slider {
+  min-width: 250px;
+  height: 6px;
+  background: #ccc;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.slider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Optional: styled slider track & thumb */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #888;
+  border: none;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #888;
+  border: none;
+  cursor: pointer;
+}
+
+.sliderFeedbackLine {
+  color: #555;
+  text-align: center;
+  padding: 6px;
+  min-height: 1.8em; /* reserve space even when empty */
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.sliderFeedbackLine.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.thumb {
+  user-select: none;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 5px;
+  background: linear-gradient(to right, 
+    #ffb3cc 0%, #ffb3cc 33%,   /* pastel pink for negative range */
+    #d3d3d3 33%, #d3d3d3 66%,   /* standard gray for neutral range */
+    #8fbf8f 66%, #8fbf8f 100%); /* pastel sage for positive range */
+    cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+input[type="range"]:focus {
+  outline: none;
+}

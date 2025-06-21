@@ -1,0 +1,111 @@
+/* ====== Layout and Global Styles ====== */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', sans-serif;  /* A sleek font */
+  color: #333;  /* Dark gray text color */
+  font-size: 16px;
+}
+
+.app {
+  height: 100%; /* NOT min-height! */
+  max-width: 800px;
+  margin: 4px auto 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* ====== Tabs Styling ====== */
+
+.tabsContainer {
+  display: flex;
+  gap: 12px; /* Space between tab headers */
+  border-bottom: 2px solid #c7d2fe; /* Light indigo line under tabs */
+  padding-bottom: 2px; /* space between tab headers and indigo line */
+  margin-bottom: 4px; /* space between indigo line and main app container */
+}
+
+.tabHeader {
+  border-radius: 8px 8px 0 0;
+  padding: 4px 10px;
+  font-weight: normal; /* unbold by default */
+  cursor: pointer;
+  user-select: none;
+
+  border: 2px solid transparent;
+  border-bottom: 2px solid transparent; /* Reserve space even for bottom */
+  transition: all 0.2s ease;
+
+  background-color: transparent;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+}
+
+/* Hover effect: soft indigo shadow around top, left, right */
+.tabHeader:hover {
+  background-color: #e0e7ff;  /* indigo-100 */
+  border-color: #c7d2fe;      /* indigo-200 */
+  border-bottom-color: transparent; /* Keep bottom "invisible" */
+}
+
+.tabHeader:hover .realText {
+  font-weight: 600;
+}
+
+.ghostText {
+  visibility: hidden;
+  font-weight: bold;
+}
+
+.realText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.react-tabs__tab--selected {
+  border: 2px solid #c7d2fe; /* indigo-200 */
+  border-bottom: none;
+  outline: none; 
+  font-weight: 600;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
+  transition: none;
+}
+
+/* Specific background colors */
+.hrDemoTab {
+  background-color: #f3f4f6; /* gray-100 */
+}
+
+.chatbotTab {
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+.animateWave {
+  display: inline-block;
+  animation: waving 0.8s infinite ease-in-out;
+  transform-origin: bottom left;
+}
+@keyframes waving {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(15deg); }
+  45% { transform: rotate(14deg); }
+  75% { transform: rotate(-10deg); }
+}
+
+.animateType {
+  display: inline-block;
+  animation: typing 0.6s infinite alternate ease-in-out;
+}
+@keyframes typing {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(4px); }
+}

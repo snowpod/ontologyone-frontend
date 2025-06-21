@@ -1,0 +1,154 @@
+.hrDemoTabPanel {
+  background-color: #f3f4f6;  /* light-gray-100 */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Container holding both accordion and input field */
+.inputContainer {
+  background-color: white;
+  width: 100%;
+  max-width: 800px;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Use this on the wrapper */
+.nl-query-input-wrapper {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+}
+
+/* Wrap the sparql output and results table to control relative stacking */
+.output-wrapper {
+  display: flex;
+  justify-content: center; /* centers horizontally */
+}
+
+.outputContainer {
+  width: 100%;
+  max-width: 800px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 50px;
+}
+
+.sparqlOutput {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+}
+
+.resultOutput {
+  margin-top: 40px;
+  margin-bottom: 10px;
+}
+
+.feedbackDivider {
+  margin-top: 10px;
+  border: none;
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    to right,
+    #b3b3b3,
+    #b3b3b3 10px,        /* dash length */
+    transparent 10px, 
+    transparent 20px     /* defines the gap. */
+  );
+  margin: 1rem 0 0 0;
+}
+
+.feedbackContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* align-items: center;
+     padding: 10px 5px 0px 5px; */
+  flex-grow: 1;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+/* ====== Textarea Styles ====== */
+
+.label {
+  margin-top: 2px;
+  margin-bottom: 4px;
+}
+
+/* Use this on the actual <textarea> */
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db; /* Tailwind's gray-300 */
+  border-radius: 0.5rem;
+  
+  white-space: pre-wrap;    /* Wrap text */
+  overflow-x: auto;         /* Show horizontal scroll if needed */
+  overflow-y: hidden;       /* No vertical scroll */
+  line-height: 1.5;
+  padding: 10px;
+
+  resize: none;
+  scrollbar-width: thin;    
+  -ms-overflow-style: none;
+}
+
+.textarea[readonly] {
+  background-color: white;
+  color: #4B5563; /* Tailwind gray-700 */
+}
+
+.textarea:focus {
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+.textareaNoWrap {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db; /* Tailwind's gray-300 */
+
+  white-space: pre;         /* No wrapping */
+  overflow-x: auto;         /* Show horizontal scroll if needed */
+  overflow-y: hidden;       /* No vertical scroll */
+  line-height: 1.5;
+  padding: 10px;
+
+  resize: none;
+  scrollbar-width: thin;    
+  -ms-overflow-style: none;
+}
+
+.textareaNoWrap[readonly] {
+  background-color: white;
+  color: #4B5563; /* Tailwind gray-700 */
+}
+
+.textareaNoWrap:focus {
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+/* ====== Extras ====== */
+
+.styledMessage {
+  color: red;
+  margin-top: 5px;
+}
+
+/* Keeps accordion from pushing layout, lets it pop above */
+.exampleQuestions {
+  position: relative;
+  display: inline-block;
+}

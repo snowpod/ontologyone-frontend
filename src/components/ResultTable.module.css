@@ -1,0 +1,35 @@
+.resultTable {
+  background-color: white;
+  width: 100%;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  border-collapse: collapse;
+  min-height: 100px;
+  padding: 8px;
+}
+
+.scrollableTableWrapper {
+  overflow-x: auto; /* allow horizontal scroll if table too wide */
+}
+
+.resultTable th,
+.resultTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.resultTable th {
+  background-color: #D1D5DB;
+  color: #333;
+  font-weight: bold;
+}
+
+.resultTable tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.resultTable tr:hover {
+  background-color: #e6e6e6;
+}
