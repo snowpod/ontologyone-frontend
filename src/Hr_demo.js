@@ -122,6 +122,9 @@ const Hr_demo = () => {
   return (
     <div className={styles.hrDemoTabPanel}>
       <div className={styles.inputContainer}>
+        <div className="bg-indigo-50 text-indigo-800 border border-indigo-300 rounded-md px-4 py-2 text-sm text-center shadow-md mx-2 mb-2">
+          ⚠️ This app uses free-tier services — processing may take a short while. Thank you for your patience!
+        </div>
         <div className={`${styles.exampleQuestions} text-sm`}>
           <ExampleQuestions questions={exampleQuestions} />
         </div>

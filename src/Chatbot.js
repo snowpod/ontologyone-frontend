@@ -139,21 +139,28 @@ const Chatbot = () => {
     const generatedColor = generatePastelColor(favoriteColor, defaultUserBubbleColor);
     setPastelColor(generatedColor);
     setIsSetupComplete(true);
-    
-    // Save user info to localStorage
+
     localStorage.setItem('chatbot_user_info', JSON.stringify({
       userName,
       favoriteColor,
-      pastelColor: generatedColor
+      pastelColor: generatedColor,
     }));
 
+    // 1. 🟢 Show greeting + latency warning immediately
+    const botFirstMessage = API.CHATBOT_INTERACTIONS.initial_response(userName) ||
+      "Hello! What would you like to know today?";
+    setChatHistory((prev) => [
+      ...prev,
+      { sender: botName, text: botFirstMessage },
+    ]);
+
+    // 2. 🟡 Call backend in background
     if (!API?.START_CHAT) {
       console.error("API.START_CHAT is not defined");
       return;
     }
-  
+
     try {
-      console.log(API.START_CHAT)
       const response = await fetch(API.START_CHAT, {
         method: "POST",
         headers: {
@@ -161,19 +168,16 @@ const Chatbot = () => {
           Accept: "application/json",
         },
       });
-  
+
       if (response.ok) {
         const data = await response.json();
-        const botFirstMessage = API.CHATBOT_INTERACTIONS.initial_response(userName) || "Hello! What would you like to know7 today?";
         setSessionId(data.session_id);
 
-        // Add initial message directly to chat history
-        setChatHistory((prevHistory) => [
-          ...prevHistory,
-          {
-            sender: botName,
-            text: botFirstMessage,
-          },
+        // 3. 🟢 Show "Harper is ready" confirmation
+        const readyMessage = API.CHATBOT_INTERACTIONS.ready_message || "I'm all set! Ask me anything.";
+        setChatHistory((prev) => [
+          ...prev,
+          { sender: botName, text: readyMessage },
         ]);
       } else {
         console.error("Failed to start chat session");
@@ -181,7 +185,7 @@ const Chatbot = () => {
     } catch (error) {
       console.error("Error starting chat session:", error);
     }
-  };  
+  };
 
   const handleFeedbackSubmit = async () => {
     if (!message.trim()) return;
@@ -293,16 +297,6 @@ const Chatbot = () => {
       setIsBotTyping(false);
     }
   }; 
-
-  useEffect(() => {
-    if (sessionId && chatHistory.length === 0) {
-      const initialMessageObject = {
-        sender: botName,
-        text: initialMessage,
-      };
-      setChatHistory((prevHistory) => [...prevHistory, initialMessageObject]);
-    }
-  }, [sessionId, userName, botName, chatHistory.length]);
 
   return (
     <div className={styles.chatbotTabPanel}>

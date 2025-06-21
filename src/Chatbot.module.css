@@ -177,14 +177,9 @@ input:focus {
 
 .kaomoji {
   display: inline-block;
-  justify-content: left;  /* controls horizontal alignment */
-  align-items: center;
-  width: 235px; /* adjust as needed */
-  height: 1.8em; /* adjust as needed */
-  overflow: hidden;
+  height: 1.2rem; /* adjust as needed */
   font-family: monospace; /* Force uniform character spacing */
-  font-size: 1.2rem; /* Adjust size nicely */
-  letter-spacing: 1px; /* <--- NEW! */
+  overflow: hidden;
   text-align: left;
   white-space: nowrap;
 }
