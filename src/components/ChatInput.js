@@ -75,7 +75,7 @@ const ChatInput = ({ onSubmit, onClear, nlQuery, setNlQuery, isInputEditable }) 
           type="button"
           onClick={handleClear}
           aria-label="Clear input"
-          className="absolute right-2 bottom-2 text-white bg-indigo-600 hover:bg-indigo-400 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 text-lg leading-normal font-semibold"
+          className="chat-clear-button absolute right-2 bottom-2 text-white bg-indigo-600 hover:bg-indigo-400 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 text-lg leading-normal font-semibold"
         >
           <svg width="11" height="11" viewBox="0 0 11 11" stroke="white">
             <line x1="1" y1="1" x2="11" y2="11" strokeWidth="2"/>

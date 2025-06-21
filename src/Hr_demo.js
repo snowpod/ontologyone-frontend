@@ -48,7 +48,7 @@ const Hr_demo = () => {
     setIsInputEditable(true);
     setIsSubmitting(false);
   };
-  
+
   const handleNlQuerySubmit = async (nlQuery) => {
     console.log("nlQuery: ", nlQuery)
     if (!nlQuery.trim()) {
