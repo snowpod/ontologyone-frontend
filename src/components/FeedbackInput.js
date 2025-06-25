@@ -47,6 +47,18 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
     },
   }));
 
+  const textarea = textareaRef.current;
+  if (textarea) {
+    const cursorPosition = textarea.selectionStart;
+    const becauseIndex = comment.indexOf(" because") + " because".length;
+
+    if (cursorPosition === becauseIndex) {
+      console.log("✅ Cursor is just after 'because'");
+    } else {
+      console.log("⚠️ Cursor is somewhere else");
+    }
+  }
+
   const appName = API.APP_NAME;
   const {
     header: feedback_header,
@@ -113,7 +125,7 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
     setSliderTouched(true);
 
     if (!hasUserTyped && comment.startsWith(prefilled)) {
-      const base = `${placeholderMap[newRating - 1]} because `;
+      const base = `${placeholderMap[newRating - 1]} because`;
       const full = `${base}... (Press Enter to submit)`;
 
       setPrefilled(base);
@@ -253,7 +265,10 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
                 aria-label="Clear input"
                 className="absolute right-2 bottom-4 text-white bg-indigo-600 hover:bg-indigo-400 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 text-sm"
               >
-                🗙
+                <svg width="11" height="11" viewBox="0 0 11 11" stroke="white">
+                  <line x1="1" y1="1" x2="11" y2="11" strokeWidth="2"/>
+                  <line x1="11" y1="1" x2="1" y2="11" strokeWidth="2"/>
+                </svg>
               </button>
             )}
           </div>
