@@ -83,7 +83,9 @@ const CHATBOT_INTERACTIONS = {
   },
   initial_response: (userName) =>
     `Hi${userName ? ` ${userName.trim()}` : ""}! Give me a moment to get everything started.  \nJust so you know — since I run on free-tier services, replies might take a little longer. Thanks for your patience!`,
+  loading_placeholder: "Please wait for Harper to be ready...",
   chatInput_placeholder: "Ask something... (Press Enter to send)",
+  ready_response: "I'm all set! Ask me anything.",
   thinking_response: "Hmm  \u00a0",
   thinking_response_trailer: ["(๑-₃-)", "(ᵕ-₃-)", "(ᵕ•₃-)", "(ᵕ•₃•)", "( •᎑•)"],
   typing_response: "Typing \u00a0('・ω)<span class='animateType'>ヘ</span>＿/ \u00a0",

@@ -10,7 +10,7 @@ import Chatbot from "./Chatbot.js";
 import "./Main.css";
 
 const MainApp = () => {
-  const appName = API.APP_NAME || "HR Demo";
+  const appName = API.APP_NAME || "OntologyOne";
   const [tabIndex, setTabIndex] = useState(0); // default to first tab
 
   useEffect(() => {

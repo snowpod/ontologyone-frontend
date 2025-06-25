@@ -8,7 +8,7 @@ import ExampleQuestions from "./components/ExampleQuestions.js";
 import styles from './Chatbot.module.css';
 
 const Chatbot = () => {
-  const appName = API?.APP_NAME || "HR Demo";
+  const appName = API?.APP_NAME || "OntologyOne";
   const botName = API?.BOT_NAME || "Chatbot";
   const exampleQuestions = API?.CHATBOT_QUESTIONS(appName) || [];
   const defaultUserBubbleColor = API?.CHATBOT_UI?.chatBubbleColor?.user || "#ADD8E6";
@@ -19,13 +19,14 @@ const Chatbot = () => {
   const openingScriptUsernameLabel = API?.CHATBOT_INTERACTIONS?.opening_script?.username_label || "What's your name?";
   const openingScriptFavoriteColorLabel = API?.CHATBOT_INTERACTIONS?.opening_script?.favorite_color_label || "What's your favorite color?";
   
+  const loading_placeholder = API?.CHATBOT_INTERACTIONS?.loading_placeholder || "";
   const chatInput_placeholder = API?.CHATBOT_INTERACTIONS?.chatInput_placeholder || "";
   const feedbackInput_placeholder = API?.CHATBOT_FEEDBACK?.chatInput_placeholder || "";
   const feedbackButton_Tooltip = API?.CHATBOT_FEEDBACK?.button_tooltip || "";
-  const feedback_reply = API?.CHATBOT_FEEDBACK?.reply || "On behalf of the team, thanks for helping us make things better! 🫴💐";
+  const feedback_reply = API?.CHATBOT_FEEDBACK?.reply || "On behalf of the team, thanks for helping us make things better! 💐";
 
-  const thinking_response_trailer = API.CHATBOT_INTERACTIONS?.thinking_response_trailer || "";
-  const typing_response_trailer = API.CHATBOT_INTERACTIONS?.typing_response_trailer || "";
+  const thinking_response_trailer = API?.CHATBOT_INTERACTIONS?.thinking_response_trailer || "";
+  const typing_response_trailer = API?.CHATBOT_INTERACTIONS?.typing_response_trailer || "";
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const randomDelay = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
@@ -34,6 +35,7 @@ const Chatbot = () => {
   const [favoriteColor, setFavoriteColor] = useState("");
   const [pastelColor, setPastelColor] = useState(defaultUserBubbleColor);
   const [isSetupComplete, setIsSetupComplete] = useState(false);
+  const [isBotReady, setIsBotReady] = useState(false);     // backend is ready
   const [sessionId, setSessionId] = useState(null);
   const [message, setMessage] = useState("");
 
@@ -44,10 +46,6 @@ const Chatbot = () => {
   const textareaRef = useRef(null);
 
   const [feedbackMode, setFeedbackMode] = useState(false);
-  //const [isFeedbackMode, setIsFeedbackMode] = useState(false);
-  const toggleFeedbackMode = () => {
-    setIsFeedbackMode((prev) => !prev);
-  };
 
   // Runs only once on page load
   useEffect(() => {
@@ -70,6 +68,10 @@ const Chatbot = () => {
   useEffect(() => {
     console.log("isSetupComplete changed to:", isSetupComplete);
   }, [isSetupComplete]);
+
+  useEffect(() => {
+    console.log("isBotReady changed to:", isBotReady);
+  }, [isBotReady]);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({
@@ -135,7 +137,7 @@ const Chatbot = () => {
     }
   };
 
-  const handleSetupComplete = async () => {
+  const handleSetupComplete111 = async () => {
     const generatedColor = generatePastelColor(favoriteColor, defaultUserBubbleColor);
     setPastelColor(generatedColor);
     setIsSetupComplete(true);
@@ -174,6 +176,7 @@ const Chatbot = () => {
         setSessionId(data.session_id);
 
         // 3. 🟢 Show "Harper is ready" confirmation
+        setIsBotReady(true); // ✅ Trigger full UI interactivity
         const readyMessage = API.CHATBOT_INTERACTIONS.ready_message || "I'm all set! Ask me anything.";
         setChatHistory((prev) => [
           ...prev,
@@ -185,6 +188,90 @@ const Chatbot = () => {
     } catch (error) {
       console.error("Error starting chat session:", error);
     }
+  };
+
+  const initializeChatUI = () => {
+    const generatedColor = generatePastelColor(favoriteColor, defaultUserBubbleColor);
+    setPastelColor(generatedColor);
+    setIsBotReady(false); // 🟡 Show loading state
+
+    localStorage.setItem('chatbot_user_info', JSON.stringify({
+      userName,
+      favoriteColor,
+      pastelColor: generatedColor,
+    }));
+
+    const botFirstMessage = API.CHATBOT_INTERACTIONS.initial_response(userName) || "Hello! What would you like to know today?";
+    setChatHistory((prev) => [...prev, { sender: botName, text: botFirstMessage }]);
+  };
+
+  const handleSetupComplete = () => {
+    const generatedColor = generatePastelColor(favoriteColor, defaultUserBubbleColor);
+    setPastelColor(generatedColor);
+
+    localStorage.setItem('chatbot_user_info', JSON.stringify({
+      userName,
+      favoriteColor,
+      pastelColor: generatedColor,
+    }));
+    
+    // Show chat UI immediately
+    setIsSetupComplete(true);
+
+    // Show latency notice right away
+    const botFirstMessage = API.CHATBOT_INTERACTIONS.initial_response(userName)
+      || "Hi there! Setting things up, give me a moment…";
+    setChatHistory((prev) => [...prev, { sender: botName, text: botFirstMessage }]);
+
+    // Then initialize the backend session asynchronously
+    finalizeSetup(); // fire-and-forget
+  };
+
+  const finalizeSetup = async (maxRetries = 5, delay = 3000) => {
+    if (!API?.START_CHAT) {
+      console.error("API.START_CHAT is not defined");
+      return;
+    }
+
+    let attempt = 0;
+    while (attempt < maxRetries) {
+      try {
+        const response = await fetch(API.START_CHAT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSessionId(data.session_id);
+
+          const readyMessage =
+            API.CHATBOT_INTERACTIONS.ready_response || "I'm all set! Ask me anything.";
+          setChatHistory((prev) => [...prev, { sender: botName, text: readyMessage }]);
+          setIsBotReady(true); // ✅ Enable UI
+          return;
+        } else {
+          console.warn(`Attempt ${attempt + 1}: Backend responded but not OK`);
+        }
+      } catch (error) {
+        console.warn(`Attempt ${attempt + 1} failed:`, error.message);
+      }
+
+      attempt++;
+      await sleep(delay);
+    }
+
+    console.error("❌ Could not connect to backend after retries.");
+    setChatHistory((prev) => [
+      ...prev,
+      {
+        sender: botName,
+        text: "Hmm, I'm having trouble starting up. Please try refreshing the page shortly.",
+      },
+    ]);
   };
 
   const handleFeedbackSubmit = async () => {
@@ -443,19 +530,31 @@ const Chatbot = () => {
                       e.preventDefault();
                       feedbackMode ? handleFeedbackSubmit() : handleSendMessage();
                     }
-                  }}
-                  placeholder={feedbackMode ? feedbackInput_placeholder : chatInput_placeholder}
+                  }} 
+                  placeholder={
+                    !isBotReady
+                      ? loading_placeholder
+                      : feedbackMode
+                      ? feedbackInput_placeholder
+                      : chatInput_placeholder
+                  }
                   className={`${styles.textarea} ${
                     feedbackMode ? "shadow-md shadow-gray-300 border-gray-300" : "shadow-none"
                   }`}
-                  style={{ paddingRight: "3rem" }} // add padding to prevent typing running into the "x"
+                  style={{ paddingRight: "3rem" }}  // add padding to prevent typing running into the "x"
+                  disabled={!isBotReady}      // disable input until Harper is ready
                 />
                 {message && (
                 <button
                   type="button"
                   onClick={handleClear}
+                  disabled={!isBotReady}
                   aria-label="Clear input"
-                  className="absolute right-2 bottom-8 text-white bg-indigo-600 hover:bg-indigo-400 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 text-lg leading-normal font-semibold"
+                  className={`absolute right-2 bottom-8 text-white w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 text-lg leading-normal font-semibold ${
+                  isBotReady
+                    ? "bg-indigo-600 hover:bg-indigo-400"
+                    : "bg-gray-300 cursor-not-allowed"
+                  }`}
                 >
                   <svg width="11" height="11" viewBox="0 0 11 11" stroke="white">
                     <line x1="1" y1="1" x2="11" y2="11" strokeWidth="2"/>
@@ -479,18 +578,22 @@ const Chatbot = () => {
 
                   {/* Chat Option */}
                   <div
-                    onClick={() => setFeedbackMode(false)}
-                    className={`inset-[2px] w-1/2 rounded-full text-center cursor-pointer z-10`}
-                    title={`Chat with ${botName}`}
+                    onClick={() => isBotReady && setFeedbackMode(false)}
+                    className={`inset-[2px] w-1/2 rounded-full text-center z-10 cursor-pointer ${
+                      !isBotReady ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    title={isBotReady ? `Chat with ${botName}` : "Waiting for Harper..."}
                   >
                     💬
                   </div>
 
                   {/* Contact Us Option */}
                   <div
-                    onClick={() => setFeedbackMode(true)}
-                    className={`inset-[2px] w-1/2 rounded-full text-center cursor-pointer z-10`}
-                    title={feedbackButton_Tooltip}
+                    onClick={() => isBotReady && setFeedbackMode(true)}
+                    className={`inset-[2px] w-1/2 rounded-full text-center z-10 cursor-pointer ${
+                      !isBotReady ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    title={isBotReady ? feedbackButton_Tooltip : "Waiting for Harper..."}
                   >
                     📩
                   </div>
