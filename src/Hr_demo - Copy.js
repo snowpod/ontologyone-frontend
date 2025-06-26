@@ -11,8 +11,6 @@ import FeedbackInput from "./components/FeedbackInput.js";
 import styles from './Hr_demo.module.css';
 
 const NO_INPUT_MSG = "Please enter a valid query.";
-const max_retries = API?.APP_STARTUP?.max_retries || 5;
-const retry_delay = API?.APP_STARTUP?.retry_delay_ms || 1000;
 
 const Hr_demo = () => {
   const [nlQuery, setNlQuery] = useState("");
@@ -49,63 +47,6 @@ const Hr_demo = () => {
     setShowFeedback(false);
     setIsInputEditable(true);
     setIsSubmitting(false);
-  };
-
-  const handleNlQuerySubmit111 = async (nlQuery) => {
-    console.log("nlQuery: ", nlQuery);
-    if (!nlQuery.trim()) {
-      setErrorMessage(NO_INPUT_MSG);
-      setIsInputEditable(false);
-      return;
-    }
-
-    setIsSubmitting(true);
-    setIsInputEditable(false);
-    setErrorMessage("");
-    setSparqlQuery("");
-    setResults("");
-
-    let attempt = 0;
-
-    while (attempt < max_retries) {
-      try {
-        console.log(`Attempt ${attempt + 1}: Fetching from ${API.PROCESS_QUERY}`);
-        const response = await fetch(API.PROCESS_QUERY, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({ nl_query: nlQuery }),
-        });
-
-        console.log("response: ", response);
-        const data = await response.json();
-
-        setSparqlQuery(data.sparql_query);
-        setResults(data.result_html);
-
-        if (data.error) {
-          setErrorMessage(data.error);
-        }
-
-        setShowFeedback(true);
-        return; // ✅ Success, stop retrying
-
-      } catch (error) {
-        console.warn(`Attempt ${attempt + 1} failed:`, error.message);
-        attempt++;
-        if (attempt >= max_retries) {
-          setErrorMessage("An error occurred, please try again later.");
-        } else {
-          await new Promise((res) => setTimeout(res, retry_delay));
-        }
-      } finally {
-        if (attempt >= max_retries) {
-          setIsSubmitting(false);
-        }
-      }
-    }
   };
 
   const handleNlQuerySubmit = async (nlQuery) => {

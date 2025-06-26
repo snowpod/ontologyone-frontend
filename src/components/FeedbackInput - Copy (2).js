@@ -16,6 +16,10 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
   const textareaRef = useRef(null);
   const bottomRef = useRef(null);
 
+ const [shouldMoveCursorAfterPrefill, setShouldMoveCursorAfterPrefill] = useState(false); 
+  const getBase = (rating) => `${placeholderMap[rating - 1]} because`;
+  const getFull = (base) => `${base}... (Press Enter to submit)`;
+
   const emojiMap = ["😞", "☹️", "😐", "😊", "🤩"];
   const placeholderMap = [
     "I really didn't enjoy it",
@@ -27,6 +31,54 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
 
   const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+  useLayoutEffect(() => {
+    if (shouldMoveCursorAfterPrefill && textareaRef.current) {
+      const pos = prefilled.length;
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(pos, pos);
+      setShouldMoveCursorAfterPrefill(false);
+    }
+  }, [shouldMoveCursorAfterPrefill, prefilled]);
+
+  const cleanupTrailingHint111 = () => {
+    if (comment.includes("(Press Enter to submit)")) {
+      const base = comment.replace(/\s*\.\.\.\s*\(Press Enter to submit\)/, "").trimEnd();
+      setComment(base + " ");
+
+      requestAnimationFrame(() => {
+        const textarea = textareaRef.current;
+        if (textarea) {
+          textarea.selectionStart = textarea.selectionEnd = (base + " ").length;
+        }
+      });
+    }
+  };
+
+  const cleanupTrailingHint = () => {
+    const textarea = textareaRef.current;
+    if (!textarea || !comment.includes("(Press Enter to submit)")) return;
+
+    const base = comment.replace(/\s*\.\.\.\s*\(Press Enter to submit\)/, "").trimEnd();
+    setComment(base + " ");
+
+    requestAnimationFrame(() => {
+      const currentPos = textarea.selectionStart;
+      const prefillEnd = (prefilled || "").length;
+
+      const isCursorAfterPrefill = Math.abs(currentPos - prefillEnd) <= 1;
+
+      if (isCursorAfterPrefill) {
+        try {
+          textarea.selectionStart = textarea.selectionEnd = prefillEnd + 1; // after space
+        } catch (e) {
+          console.warn("Could not reposition cursor:", e);
+        }
+      }
+      // If cursor was elsewhere (e.g. user tapped early), let it be
+    });
+  };
+
+
   const toggleExpanded = () => {
     setIsExpanded((prev) => {
       const next = !prev;
@@ -35,20 +87,10 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
       }
 
       if (next && !comment.trim()) {
-        const base = `${placeholderMap[rating - 1]} because `;
-        const full = `${base}... (Press Enter to submit)`;
-
+        const base = getBase(rating);
+        const full = getFull(base);
         setPrefilled(base);
         setComment(full);
-
-        // Wait until next tick to move cursor
-        setTimeout(() => {
-          const textarea = textareaRef.current;
-          if (textarea) {
-            textarea.focus();
-            textarea.setSelectionRange(base.length, base.length);
-          }
-        }, 0);
       }
 
       return next;
@@ -65,17 +107,21 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
     },
   }));
 
+  /*
   const textarea = textareaRef.current;
   if (textarea) {
-    const cursorPosition = textarea.selectionStart;
-    const becauseIndex = comment.indexOf(" because") + " because".length;
 
+    const cursorPosition = textarea.selectionStart;
+    const becauseIndex = comment.indexOf(" because") + " because".length + 1; // +1 for the space after "because"
+
+    console.log("cursorPosition:", cursorPosition, ", becauseIndex: ", becauseIndex);
     if (cursorPosition === becauseIndex) {
       console.log("✅ Cursor is just after ' because'");
     } else {
       console.log("⚠️ Cursor is somewhere else");
     }
   }
+  */
 
   const appName = API.APP_NAME;
   const {
@@ -137,51 +183,7 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
     return `${base}${feedback_reply_reward(emoji)}`;
   };
 
-  const handleSliderChange = (e) => {
-    const newRating = Number(e.target.value);
-    setRating(newRating);
-    setSliderTouched(true);
-
-    if (!hasUserTyped) {
-      const base = `${placeholderMap[newRating - 1]} because `;
-      const full = `${base}... (Press Enter to submit)`;
-
-      setPrefilled(base);
-      setComment(full);
-
-      requestAnimationFrame(() => {
-        if (textareaRef.current) {
-          textareaRef.current.selectionStart = textareaRef.current.selectionEnd = base.length;
-        }
-      });
-    }
-  };
-
-  const handleTextareaFocus = () => {
-    if (!comment.trim()) {
-      const base = `${placeholderMap[rating - 1]} because`;
-      const full = `${base}... (Press Enter to submit)`;
-      setPrefilled(base);
-
-      requestAnimationFrame(() => {
-        setComment(full);
-        const textarea = textareaRef.current;
-        if (textarea) {
-          textarea.selectionStart = textarea.selectionEnd = base.length;
-          textarea.focus();
-        }
-      });
-    } else if (comment.includes("(Press Enter to submit)")) {
-      const base = comment.replace(/\s*\.\.\.\s*\(Press Enter to submit\)/, "").trimEnd();
-      setComment(base + " ");
-      const textarea = textareaRef.current;
-      if (textarea) {
-        textarea.selectionStart = textarea.selectionEnd = base.length + 1;
-      }
-    }
-  };
-
-  const detectPlatform = () => {
+    const detectPlatform = () => {
     const ua = navigator.userAgent || "";
     const uaData = navigator.userAgentData;
 
@@ -201,28 +203,93 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
     };
   };
 
-  const moveCursorToEndOfPrefill = () => {
+  const handleSliderChange = (e) => {
+    const newRating = Number(e.target.value);
+    setRating(newRating);
+    setSliderTouched(true);
+
+    if (!hasUserTyped) {
+      const base = `${placeholderMap[newRating - 1]} because`;
+      const full = `${base}... (Press Enter to submit)`;
+
+      setPrefilled(base);
+      setComment(full);
+
+      // Remove cursor by blurring the textarea
+      if (textareaRef.current) {
+        textareaRef.current.blur();
+      }
+    }
+  };
+
+  const handleTextareaFocus = () => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
-    const pos = (prefilled || "").length;
+    const currentPos = textarea.selectionStart;
+    const becauseEnd = (prefilled || "").length;
 
-    // Adjust the delay based on platform
-    // iOS needs a longer delay and user interaction
-    const { isIOS } = detectPlatform();
-    const delay = isIOS ? 500 : 300;
-
-    textarea.focus(); // must be called before selection in most mobile cases
-
-    setTimeout(() => {
-      try {
-        textarea.setSelectionRange(pos, pos);
-      } catch (e) {
-        console.warn("Could not set cursor:", e);
-      }
-    }, delay);
+    if (!comment.trim()) {
+      const base = getBase(rating);
+      const full = getFull(base);
+      setPrefilled(base);
+      setComment(full);
+      setShouldMoveCursorAfterPrefill(true);
+    } 
+    else {
+      console.log("handleTextareaFocus cleaning up trailing hint");
+      cleanupTrailingHint();
+    }
   };
 
+  const handleTextareaTouchEnd = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    requestAnimationFrame(() => {
+      const currentPos = textarea.selectionStart;
+      const becauseEnd = (prefilled || "").length;
+
+      cleanupTrailingHint();
+
+      const tapWasNearEnd =
+        Math.abs(currentPos - becauseEnd) <= 1 ||
+        comment.slice(currentPos).startsWith("...");
+
+      if (tapWasNearEnd) {
+        textarea.setSelectionRange(becauseEnd + 1, becauseEnd + 1);
+      } else {
+        // Let the user's tap decide the caret position naturally
+        console.log("✏️ User tapped somewhere else — leaving cursor at", currentPos);
+      }
+    });
+  };
+
+  const handleTextareaTouchEnd111 = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const becauseEnd = (prefilled || "").length;
+    const currentPos = textarea.selectionStart;
+
+    // Always cleanup trailing hint on touch
+    cleanupTrailingHint();
+
+    // If user tapped right after "because", gently reposition to desired cursor spot
+    // Else leave it at currentPos to respect user's touch
+    const becauseIndex = comment.indexOf(" because") + " because".length;
+    console.log("becauseIndex:", becauseIndex);
+    console.log("currentPos:", currentPos, ", becauseEnd:", becauseEnd);
+    if (Math.abs(currentPos - becauseEnd) <= 1) {
+      setTimeout(() => {
+        try {
+          textarea.setSelectionRange(becauseEnd + 1, becauseEnd + 1); // one space after
+        } catch (e) {
+          console.warn("Unable to move cursor after 'because':", e);
+        }
+      }, 0); // no delay needed for Android, 0ms works
+    }
+  };
 
   const handleCommentChange = (e) => {
     const value = e.target.value;
@@ -313,9 +380,10 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
               value={comment}
               onChange={handleCommentChange}
               onFocus={handleTextareaFocus}
-              onTouchEnd={moveCursorToEndOfPrefill} // required for mobile/iOS
+              onTouchEnd={handleTextareaTouchEnd} // required for mobile/iOS
+              onMouseUp={handleTextareaTouchEnd}   // Desktop
               onKeyDown={handleKeyDown}
-              placeholder={`${placeholderMap[rating - 1]} because... (Press Enter to submit)`}
+              placeholder={`${placeholderMap[rating - 1]} because `}
               disabled={isSubmitted}
               className={`${styles.textarea} ${
                 !hasUserTyped && comment.startsWith(prefilled) ? styles.placeholderLike : 'text-black'

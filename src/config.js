@@ -57,6 +57,16 @@ const APP_FEEDBACK = {
   },
 };
 
+const APP_STARTUP = {
+  max_retries:  5,
+  retry_delay_ms: 3000
+};
+
+const CHATBOT_STARTUP = {
+  max_retries:  7,
+  retry_delay_ms: 2000
+};
+
 const CHATBOT_UI = {
   chatBubbleColor: {
     user: "#EBEBEE",  // White
@@ -110,6 +120,8 @@ export default {
   BOT_NAME,
   APP_QUESTIONS,
   APP_FEEDBACK,
+  APP_STARTUP,
+  CHATBOT_STARTUP,
   CHATBOT_UI,
   CHATBOT_QUESTIONS,
   CHATBOT_INTERACTIONS,

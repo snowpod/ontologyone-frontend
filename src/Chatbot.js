@@ -22,11 +22,15 @@ const Chatbot = () => {
   const loading_placeholder = API?.CHATBOT_INTERACTIONS?.loading_placeholder || "";
   const chatInput_placeholder = API?.CHATBOT_INTERACTIONS?.chatInput_placeholder || "";
   const feedbackInput_placeholder = API?.CHATBOT_FEEDBACK?.chatInput_placeholder || "";
-  const feedbackButton_Tooltip = API?.CHATBOT_FEEDBACK?.button_tooltip || "";
+  const feedbackButton_tooltip = API?.CHATBOT_FEEDBACK?.button_tooltip || "";
   const feedback_reply = API?.CHATBOT_FEEDBACK?.reply || "On behalf of the team, thanks for helping us make things better! 💐";
 
   const thinking_response_trailer = API?.CHATBOT_INTERACTIONS?.thinking_response_trailer || "";
   const typing_response_trailer = API?.CHATBOT_INTERACTIONS?.typing_response_trailer || "";
+
+  const max_retries = API?.CHATBOT_STARTUP?.max_retries;
+  const retry_delay = API?.CHATBOT_STARTUP?.retry_delay_ms;
+
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const randomDelay = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
@@ -137,59 +141,6 @@ const Chatbot = () => {
     }
   };
 
-  const handleSetupComplete111 = async () => {
-    const generatedColor = generatePastelColor(favoriteColor, defaultUserBubbleColor);
-    setPastelColor(generatedColor);
-    setIsSetupComplete(true);
-
-    localStorage.setItem('chatbot_user_info', JSON.stringify({
-      userName,
-      favoriteColor,
-      pastelColor: generatedColor,
-    }));
-
-    // 1. 🟢 Show greeting + latency warning immediately
-    const botFirstMessage = API.CHATBOT_INTERACTIONS.initial_response(userName) ||
-      "Hello! What would you like to know today?";
-    setChatHistory((prev) => [
-      ...prev,
-      { sender: botName, text: botFirstMessage },
-    ]);
-
-    // 2. 🟡 Call backend in background
-    if (!API?.START_CHAT) {
-      console.error("API.START_CHAT is not defined");
-      return;
-    }
-
-    try {
-      const response = await fetch(API.START_CHAT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSessionId(data.session_id);
-
-        // 3. 🟢 Show "Harper is ready" confirmation
-        setIsBotReady(true); // ✅ Trigger full UI interactivity
-        const readyMessage = API.CHATBOT_INTERACTIONS.ready_message || "I'm all set! Ask me anything.";
-        setChatHistory((prev) => [
-          ...prev,
-          { sender: botName, text: readyMessage },
-        ]);
-      } else {
-        console.error("Failed to start chat session");
-      }
-    } catch (error) {
-      console.error("Error starting chat session:", error);
-    }
-  };
-
   const initializeChatUI = () => {
     const generatedColor = generatePastelColor(favoriteColor, defaultUserBubbleColor);
     setPastelColor(generatedColor);
@@ -219,15 +170,14 @@ const Chatbot = () => {
     setIsSetupComplete(true);
 
     // Show latency notice right away
-    const botFirstMessage = API.CHATBOT_INTERACTIONS.initial_response(userName)
-      || "Hi there! Setting things up, give me a moment…";
+    const botFirstMessage = API.CHATBOT_INTERACTIONS.initial_response(userName) || "Hi there! Setting things up, give me a moment…";
     setChatHistory((prev) => [...prev, { sender: botName, text: botFirstMessage }]);
 
     // Then initialize the backend session asynchronously
-    finalizeSetup(); // fire-and-forget
+    finalizeSetup(max_retries, retry_delay); // fire-and-forget
   };
-
-  const finalizeSetup = async (maxRetries = 5, delay = 3000) => {
+  
+  const finalizeSetup = async (maxRetries = 5, retryDelay = 3000) => {
     if (!API?.START_CHAT) {
       console.error("API.START_CHAT is not defined");
       return;
@@ -261,7 +211,7 @@ const Chatbot = () => {
       }
 
       attempt++;
-      await sleep(delay);
+      await sleep(retryDelay);
     }
 
     console.error("❌ Could not connect to backend after retries.");
@@ -593,7 +543,7 @@ const Chatbot = () => {
                     className={`inset-[2px] w-1/2 rounded-full text-center z-10 cursor-pointer ${
                       !isBotReady ? "opacity-50 cursor-not-allowed" : ""
                     }`}
-                    title={isBotReady ? feedbackButton_Tooltip : "Waiting for Harper..."}
+                    title={isBotReady ? feedbackButton_tooltip : "Waiting for Harper..."}
                   >
                     📩
                   </div>
