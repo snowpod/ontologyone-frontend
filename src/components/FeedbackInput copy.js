@@ -16,10 +16,6 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
   const textareaRef = useRef(null);
   const bottomRef = useRef(null);
 
- const [shouldMoveCursorAfterPrefill, setShouldMoveCursorAfterPrefill] = useState(false); 
-  const getBase = (rating) => `${placeholderMap[rating - 1]} because `;
-  const getFull = (base) => `${base}... (Press Enter to submit)`;
-
   const emojiMap = ["😞", "☹️", "😐", "😊", "🤩"];
   const placeholderMap = [
     "I really didn't enjoy it",
@@ -31,15 +27,6 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
 
   const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-  useLayoutEffect(() => {
-    if (shouldMoveCursorAfterPrefill && textareaRef.current) {
-      const pos = prefilled.length;
-      textareaRef.current.focus();
-      textareaRef.current.setSelectionRange(pos, pos);
-      setShouldMoveCursorAfterPrefill(false);
-    }
-  }, [shouldMoveCursorAfterPrefill, prefilled]);
-
   const toggleExpanded = () => {
     setIsExpanded((prev) => {
       const next = !prev;
@@ -48,12 +35,20 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
       }
 
       if (next && !comment.trim()) {
-        const base = getBase(rating);
-        const full = getFull(base);
+        const base = `${placeholderMap[rating - 1]} because `;
+        const full = `${base}... (Press Enter to submit)`;
+
         setPrefilled(base);
         setComment(full);
-        console.log("Rendered comment 111:", comment, ", should me:", full);
-        //setShouldMoveCursorAfterPrefill(true);
+
+        // Wait until next tick to move cursor
+        setTimeout(() => {
+          const textarea = textareaRef.current;
+          if (textarea) {
+            textarea.focus();
+            textarea.setSelectionRange(base.length, base.length);
+          }
+        }, 0);
       }
 
       return next;
@@ -164,14 +159,19 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
 
   const handleTextareaFocus = () => {
     if (!comment.trim()) {
-      const base = getBase(rating);
-      const full = getFull(base);
+      const base = `${placeholderMap[rating - 1]} because`;
+      const full = `${base}... (Press Enter to submit)`;
       setPrefilled(base);
-      setComment(full);
-      console.log("Rendered comment 222:", JSON.stringify(comment));
-      setShouldMoveCursorAfterPrefill(true);
-    } 
-    else if (comment.includes("(Press Enter to submit)")) {
+
+      requestAnimationFrame(() => {
+        setComment(full);
+        const textarea = textareaRef.current;
+        if (textarea) {
+          textarea.selectionStart = textarea.selectionEnd = base.length;
+          textarea.focus();
+        }
+      });
+    } else if (comment.includes("(Press Enter to submit)")) {
       const base = comment.replace(/\s*\.\.\.\s*\(Press Enter to submit\)/, "").trimEnd();
       setComment(base + " ");
       const textarea = textareaRef.current;
@@ -315,7 +315,7 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
               onFocus={handleTextareaFocus}
               onTouchEnd={moveCursorToEndOfPrefill} // required for mobile/iOS
               onKeyDown={handleKeyDown}
-              placeholder={`${placeholderMap[rating - 1]} because`}
+              placeholder={`${placeholderMap[rating - 1]} because... (Press Enter to submit)`}
               disabled={isSubmitted}
               className={`${styles.textarea} ${
                 !hasUserTyped && comment.startsWith(prefilled) ? styles.placeholderLike : 'text-black'
