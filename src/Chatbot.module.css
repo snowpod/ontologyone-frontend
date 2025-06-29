@@ -186,6 +186,29 @@ input:focus {
 
 /* ====== Extras ====== */
 
+.tooltipContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltipText {
+  background-color: gray; /* customize as needed */
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+  z-index: 20;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.tooltipContainer:hover .tooltipText,
+.tooltipContainer:focus-within .tooltipText {
+  visibility: visible;
+  opacity: 1;
+}
+
 pre code {
   display: block;
   max-height: 300px;

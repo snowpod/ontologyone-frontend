@@ -14,9 +14,10 @@
   width: 100%;
   border: 1px solid #ccc;
   border-radius: 8px;
-  padding: 10px 40px 10px 10px; /* leave space for the "x" button */
+  padding: 10px 47px 10px 10px; /* leave space for the "x" button */
   line-height: 1.5;
   resize: none;
+  overflow-y: hidden;
   transition: all 0.2s ease;
 }
 

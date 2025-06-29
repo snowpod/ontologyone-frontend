@@ -248,32 +248,6 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
     });
   };
 
-  const handleTextareaTouchEnd111 = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const becauseEnd = (prefilled || "").length;
-    const currentPos = textarea.selectionStart;
-
-    // Always cleanup trailing hint on touch
-    cleanupTrailingHint();
-
-    // If user tapped right after "because", gently reposition to desired cursor spot
-    // Else leave it at currentPos to respect user's touch
-    const becauseIndex = comment.indexOf(" because") + " because".length;
-    console.log("becauseIndex:", becauseIndex);
-    console.log("currentPos:", currentPos, ", becauseEnd:", becauseEnd);
-    if (Math.abs(currentPos - becauseEnd) <= 1) {
-      setTimeout(() => {
-        try {
-          textarea.setSelectionRange(becauseEnd + 1, becauseEnd + 1); // one space after
-        } catch (e) {
-          console.warn("Unable to move cursor after 'because':", e);
-        }
-      }, 0); // no delay needed for Android, 0ms works
-    }
-  };
-
   const handleCommentChange = (e) => {
     const value = e.target.value;
     setComment(value);
@@ -375,13 +349,22 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
             {!isSubmitted && hasUserTyped && (
               <button
                 type="button"
-                onClick={handleClear}
-                aria-label="Clear input"
-                className="absolute right-2 bottom-4 text-white bg-indigo-600 hover:bg-indigo-400 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 text-sm"
+                onClick={handleKeyDown}
+                aria-label="Send feedback"
+                className="absolute right-2 bottom-4 text-white bg-indigo-600 hover:bg-indigo-400 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 text-sm"
               >
-                <svg width="11" height="11" viewBox="0 0 11 11" stroke="white">
-                  <line x1="1" y1="1" x2="11" y2="11" strokeWidth="2"/>
-                  <line x1="11" y1="1" x2="1" y2="11" strokeWidth="2"/>
+                {/* Right turn arrow */}
+                <svg
+                  width="24px"
+                  height="24px"
+                  viewBox="0 0 26 26"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M17.249 4.931v6.926c0 0.574-0.229 1.125-0.636 1.53-0.407 0.406-0.959 0.634-1.535 0.634H9.437v-2.164a0.867 0.867 0 0 0-1.482-0.612l-3.472 3.463a0.866 0.866 0 0 0 0 1.224l3.472 3.463a0.867 0.867 0 0 0 1.482-0.613v-2.164h5.642c1.266 0 2.48-0.502 3.376-1.395a4.748 4.748 0 0 0 1.398-3.367V4.931a0.868 0.868 0 0 0-0.868-0.866h-0.868a0.868 0.868 0 0 0-0.868 0.866z"
+                    fill="currentColor"
+                  />
                 </svg>
               </button>
             )}

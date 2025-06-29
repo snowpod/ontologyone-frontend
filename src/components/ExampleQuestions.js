@@ -15,7 +15,8 @@ const ExampleQuestions = ({ questions }) => {
       if (
         wrapperRef.current &&
         !wrapperRef.current.contains(event.target) &&
-        !event.target.closest(".chat-clear-button") // or give the "×" a unique ID/class
+        !event.target.closest(".chat-send-button") &&   // or give the "<-" a unique ID/class
+        !event.target.closest(".chat-clear-button")     // or give the "x" a unique ID/class
       ) {
         setIsOpen(false);
       }
@@ -41,7 +42,7 @@ const ExampleQuestions = ({ questions }) => {
         className={`${styles["accordion-header"]} text-left focus:outline-none focus:ring-0 rounded-lg p-2 hover:bg-gray-200 transition duration-300 ease-in-out`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        {isOpen ? `▼ ${section_header}` : `▶ ${section_header}`}
+        {isOpen ? `▲ ${section_header}` : `▼ ${section_header}`}
       </button>
 
       {isOpen && (

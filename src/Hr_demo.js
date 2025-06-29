@@ -181,9 +181,22 @@ const Hr_demo = () => {
   return (
     <div className={styles.hrDemoTabPanel}>
       <div className={styles.inputContainer}>
-        <div className="bg-indigo-50 text-indigo-800 border border-indigo-300 rounded-md px-4 py-2 text-sm text-center shadow-md mx-2 mb-2">
-          ⚠️ This app uses free-tier services — processing may take a short while. Thank you for your patience!
-        </div>
+   {/* App blurb card */}
+  <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-3">
+    <p className="text-gray-700 text-sm">
+      OntologyOne helps answer questions about aligned roles across local offices,
+      (e.g., identify "GlobalTech's developers" despite varying titles), compare 
+      remuneration in USD, and explore reporting structures for organisation-wide insights.
+    </p>
+  </div>
+
+  {/* Warning card */}
+  <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 shadow-sm mb-4 flex items-center">
+    <span className="text-indigo-700 text-sm">
+      ⚠️ This app uses free-tier services — processing may take a short while. Thank you for your patience!
+    </span>
+  </div>
+
         <div className={`${styles.exampleQuestions} text-sm`}>
           <ExampleQuestions questions={exampleQuestions} />
         </div>

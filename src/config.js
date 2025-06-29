@@ -63,7 +63,7 @@ const APP_STARTUP = {
 };
 
 const CHATBOT_STARTUP = {
-  max_retries:  7,
+  max_retries:  8,
   retry_delay_ms: 2000
 };
 
@@ -104,7 +104,7 @@ const CHATBOT_INTERACTIONS = {
 };
 
 const CHATBOT_FEEDBACK = {
-  button_tooltip: "Contact the team: Feedback, Comments or Message",
+  button_tooltip: "Contact the team: Comments or Message",
   chatInput_placeholder: "Ok, let me note this down for the team... (Press Enter to submit)",
   reply: "Can! On behalf of the team, thanks for helping us make things better! 💐",
 };

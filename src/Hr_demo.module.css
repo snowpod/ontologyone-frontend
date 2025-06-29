@@ -92,7 +92,7 @@
   box-sizing: border-box;
   border: 1px solid #d1d5db; /* Tailwind's gray-300 */
   border-radius: 0.5rem;
-  
+
   white-space: pre-wrap;    /* Wrap text */
   overflow-x: auto;         /* Show horizontal scroll if needed */
   overflow-y: hidden;       /* No vertical scroll */
