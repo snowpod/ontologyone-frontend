@@ -309,7 +309,7 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
         className={`${styles.feedbackHeader} text-left text-sm focus:outline-none focus:ring-0 rounded-lg p-2 hover:bg-gray-200 transition duration-300 ease-in-out`}
         onClick={toggleExpanded}
       >
-        {isExpanded ? `▼ ${feedback_header(appName)}` : `▶ ${feedback_header(appName)}`}
+        {isExpanded ? `▲ ${feedback_header(appName)}` : `▼ ${feedback_header(appName)}`}
       </button>
 
       {isExpanded && (
