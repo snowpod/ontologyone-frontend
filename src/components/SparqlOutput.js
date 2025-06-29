@@ -31,7 +31,7 @@ const SparqlOutput = ({ sparqlQuery }) => {
         onClick={toggleExpand}
         className="w-full text-left text-base font-semibold text-gray-700 bg-gray-100 px-4 py-2 rounded-md hover:bg-gray-200 transition"
       >
-        {isExpanded ? "▼" : "▶"} Translated SPARQL query
+        {isExpanded ? "▲" : "▼"} Translated SPARQL query
       </button>
 
       {isExpanded && (
