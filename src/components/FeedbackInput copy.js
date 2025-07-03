@@ -186,26 +186,18 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
     };
   };
 
-  const handleSubmit = ({ allowEmpty = false } = {}) => {
-    const trimmed = comment.trim();
-    if (!allowEmpty && !trimmed && !sliderTouched) return;
+  const handleSubmit = () => {
+    if (comment.trim() || sliderTouched) {
+      const sentiment = getSentimentClass(rating);
+      const mismatch =
+        hasUserTyped && initialRatingAtFirstInput !== null &&
+        initialRatingAtFirstInput !== rating;
 
-    const sentiment = getSentimentClass(rating);
-    const mismatch =
-      hasUserTyped && initialRatingAtFirstInput !== null &&
-      initialRatingAtFirstInput !== rating;
+      const hasComment = hasUserTyped && comment.trim() !== "";
 
-    const hasComment = hasUserTyped && trimmed !== "";
-
-    onFeedback?.({ comment: trimmed || prefilled, rating });
-    setReply(generateReply(sentiment, mismatch, rating, hasComment));
-    setIsSubmitted(true);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
+      onFeedback?.({ comment: comment.trim() || prefilled, rating });
+      setReply(generateReply(sentiment, mismatch, rating, hasComment));
+      setIsSubmitted(true);
     }
   };
 
@@ -294,17 +286,39 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
     textareaRef.current?.blur();
   };
 
-  const handleWrapperKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey && document.activeElement !== textareaRef.current) {
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit({ allowEmpty: true }); // allow submission with slider only
+      if (comment.trim() || sliderTouched) {
+        const sentiment = getSentimentClass(rating);
+        const mismatch =
+          hasUserTyped && initialRatingAtFirstInput !== null &&
+          initialRatingAtFirstInput !== rating;
+
+        const hasComment = hasUserTyped && comment.trim() !== "";
+
+        onFeedback?.({ comment: comment.trim() || prefilled, rating });
+        setReply(generateReply(sentiment, mismatch, rating, hasComment));
+        setIsSubmitted(true);
+      }
     }
   };
 
   return (
     <div
       className={styles.feedbackWrapper}
-      onKeyDown={(e) => { handleWrapperKeyDown(e)}}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && !e.shiftKey && document.activeElement !== textareaRef.current) {
+          e.preventDefault();
+          if (!hasUserTyped && !isSubmitted) {
+            const sentiment = getSentimentClass(rating);
+            const mismatch = false; // no comment, so no mismatch
+            onFeedback?.({ comment: placeholderMap[rating - 1], rating });
+            setReply(generateReply(sentiment, mismatch, rating, false));
+            setIsSubmitted(true);
+          }
+        }
+      }}
     >
       <button
         className={`${styles.feedbackHeader} text-left text-sm focus:outline-none focus:ring-0 rounded-lg p-2 hover:bg-gray-200 transition duration-300 ease-in-out`}
@@ -330,7 +344,7 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
             />
           </div>
 
-          {/* Dynamic Placeholder + Submit/Enter Button */}
+          {/* Dynamic Placeholder + Clear Button */}
           <div className={styles.textareaContainer}>
             <textarea
               ref={textareaRef}
@@ -340,7 +354,7 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
               onFocus={handleTextareaFocus}
               onTouchEnd={handleTextareaTouchEnd} // required for mobile/iOS
               onMouseUp={handleTextareaTouchEnd}   // Desktop
-              onKeyDown={handleKeyDown}
+              onKeyDown={handleSubmit}
               placeholder={`${placeholderMap[rating - 1]} because `}
               disabled={isSubmitted}
               className={`${styles.textarea} ${
@@ -350,7 +364,7 @@ const FeedbackInput = forwardRef(({ onFeedback, onExpand }, ref) => {
             {!isSubmitted && hasUserTyped && (
               <button
                 type="button"
-                onClick={() => handleSubmit()}
+                onClick={handleKeyDown}
                 aria-label="Send feedback"
                 className="absolute right-2 bottom-4 text-white bg-indigo-600 hover:bg-indigo-400 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 text-sm"
               >
